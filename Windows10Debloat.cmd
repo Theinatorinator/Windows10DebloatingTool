@@ -72,7 +72,9 @@ mkdir Debloater
 
 cd Debloater
 
-
+rem dev 
+rem goto :NETWORK
+rem dev
 :DEBLOAT
 
 rem debloat using https://github.com/Sycnex/Windows10Debloater
@@ -116,13 +118,18 @@ echo "| |              | || |              | || |              | || |           
 echo "| '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |"
 echo " '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------' "
 
+rem note, we dont do v6 ebcause it may cause issues on some systems
 echo  ######## Releasing IP Addresses
 ipconfig /release
-ipconfig /release6
+rem ipconfig /release6
+
+echo  "|"
 
 echo  Renewing IP Addresses 
+
 ipconfig /renew
-ipconfig /renew6
+echo v6
+rem ipconfig /renew6
 
 echo  Deleting Address Translation tables 
 arp -d *
@@ -137,16 +144,6 @@ ipconfig /flushdns
 
 echo  Refresh DHCP leases and re-registering DNS names 
 ipconfig /registerdns
-
-rem set dns
-
-echo setting dns
-
-netsh interface ipv4 add dnsserver "Local Area Connection" 8.8.8.8
-netsh interface ipv6 add dnsserver "Local Area Connection" 2002:0:0:0:0:0:808:808
-
-netsh interface ipv4 add dnsserver "Wireless Network Connection" 8.8.4.4
-netsh interface ipv6 add dnsserver "Wireless Network Connection" 2002:0:0:0:0:0:808:404
 
 rem wait for connection reestablishment
 
@@ -194,6 +191,9 @@ echo "eeeeeee\:::\____\eeeeeeeeeeeeeeee/:::/eeee/eeeeeeeeeeeeee\::::/eeee/eeeeee
 echo "eeeeeeee\::/eeee/eeeeeeeeeeeeeeee\::/eeee/eeeeeeeeeeeeeeee\::/____/eeeeeeee"
 echo "eeeeeeeee\/____/eeeeeeeeeeeeeeeeee\/____/eeeeeeeeeeeeeeeeee~~eeeeeeeeeeeeee"
 echo "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+
+pause 
+
 goto CLEANUP
 
 :CLEANUP 
@@ -227,4 +227,5 @@ echo "eeeeeee\:::\____\eeeeeeee"
 echo "eeeeeeee\::/eeee/eeeeeeee"
 echo "eeeeeeeee\/____/eeeeeeeee"
 echo "eeeeeeeeeeeeeeeeeeeeeeeee"
+
 exit
