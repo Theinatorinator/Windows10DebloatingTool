@@ -59,6 +59,25 @@
  ::::::::::::::::::::::::::::
 
 
+
+rem set up working directory in temp
+
+cd %Temp%
+
+if exist Debloater (
+   RMDIR "Debloater" /S /Q
+)
+
+mkdir Debloater
+
+cd Debloater
+
+rem dev 
+rem goto :NETWORK
+rem dev
+:DEBLOAT
+
+rem debloat using https://github.com/Sycnex/Windows10Debloater
 echo " .----------------. .----------------. .----------------. .----------------. .----------------. .----------------. .----------------. "  
 echo "| .--------------. | .--------------. | .--------------. | .--------------. | .--------------. | .--------------. | .--------------. |"  
 echo "| |  ________    | | |  _________   | | |   ______     | | |   _____      | | |     ____     | | |      __      | | |  _________   | |"  
@@ -70,44 +89,143 @@ echo "| | |________.'  | | | |_________|  | | |  |_______/   | | |  |________|  
 echo "| |              | | |              | | |              | | |              | | |              | | |              | | |              | |"  
 echo "| '--------------' | '--------------' | '--------------' | '--------------' | '--------------' | '--------------' | '--------------' |"  
 echo " '----------------' '----------------' '----------------' '----------------' '----------------' '----------------' '----------------' "  
-echo Welcome to the windows 10 debloating utility
 echo Debloating provided by https://github.com/Sycnex/Windows10Debloater
-echo This quick runner was made by https://github.com/Theinatorinator 
-
-echo Are you sure you want to continue?
-
-CHOICE /C YN 
-
-IF %ERRORLEVEL% EQU 1 goto CONTINUE
-IF %ERRORLEVEL% EQU 2 goto END
-
-:CONTINUE
-
-if exist Windows10Debloater (
-   RMDIR "Windows10Debloater" /S /Q
-)
 
 PowerShell.exe -command "Invoke-WebRequest https://github.com/Sycnex/Windows10Debloater/archive/refs/heads/master.zip -OutFile "%cd%"temp.zip"
 PowerShell.exe -command "Expand-Archive -Force %cd%temp.zip %cd% "
 ren Windows10Debloater-master Windows10Debloater
-Attrib +h %cd%\Windows10Debloater
 cd Windows10Debloater
-
 
 rem set varibles for the execution
 set "script=.\Windows10SysPrepDebloater.ps1 -Debloat -Privacy"
 rem execute
 PowerShell.exe -ExecutionPolicy Unrestricted -command ""%cd%""/""%script%" -verb RunAs
 
+rem transfer to neteowrk cleaning
+:DEBLOATNEXT
 
-rem cleanup
-cd ..
-echo Cleaning up
-Attrib -h %cd%\Windows10Debloater
-RMDIR "Windows10Debloater" /S /Q
+:NETWORK
 
-echo Opertaion Complete!
-pause
+echo " .-----------------. .----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------. "
+echo "| .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |"
+echo "| | ____  _____  | || |  _________   | || |  _________   | || | _____  _____ | || |     ____     | || |  _______     | || |  ___  ____   | |"
+echo "| ||_   \|_   _| | || | |_   ___  |  | || | |  _   _  |  | || ||_   _||_   _|| || |   .'    `.   | || | |_   __ \    | || | |_  ||_  _|  | |"
+echo "| |  |   \ | |   | || |   | |_  \_|  | || | |_/ | | \_|  | || |  | | /\ | |  | || |  /  .--.  \  | || |   | |__) |   | || |   | |_/ /    | |"
+echo "| |  | |\ \| |   | || |   |  _|  _   | || |     | |      | || |  | |/  \| |  | || |  | |    | |  | || |   |  __ /    | || |   |  __'.    | |"
+echo "| | _| |_\   |_  | || |  _| |___/ |  | || |    _| |_     | || |  |   /\   |  | || |  \  `--'  /  | || |  _| |  \ \_  | || |  _| |  \ \_  | |"
+echo "| ||_____|\____| | || | |_________|  | || |   |_____|    | || |  |__/  \__|  | || |   `.____.'   | || | |____| |___| | || | |____||____| | |"
+echo "| |              | || |              | || |              | || |              | || |              | || |              | || |              | |"
+echo "| '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |"
+echo " '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------' "
 
+rem note, we dont do v6 ebcause it may cause issues on some systems
+echo  ######## Releasing IP Addresses
+ipconfig /release
+rem ipconfig /release6
+
+echo  "|"
+
+echo  Renewing IP Addresses 
+
+ipconfig /renew
+echo v6
+rem ipconfig /renew6
+
+echo  Deleting Address Translation tables 
+arp -d *
+
+echo  NetBIOS / WINS - Deleting and Refreshing Cache 
+
+nbtstat -R
+nbtstat -RR
+
+echo  Deleting DNS resolver cache 
+ipconfig /flushdns
+
+echo  Refresh DHCP leases and re-registering DNS names 
+ipconfig /registerdns
+
+rem wait for connection reestablishment
+
+set target=www.google.com
+echo Waiting for connection..
+:ping
+<nul set /p strTemp=.
+timeout 2 > NUL
+ping %target% -n 1 | find "TTL="
+if errorlevel==1 goto ping
+
+echo network-ops complete
+
+goto NETWORKNEXT
+
+
+rem network next
+:NETWORKNEXT
+rem network next
+
+
+
+goto END
 :END
+echo all ops complete!
+echo "eeeeeeeeee_____eeeeeeeeeeeeeeeeeeee_____eeeeeeeeeeeeeeeeeeee_____eeeeeeeeee"
+echo "eeeeeeeee/\eeee\eeeeeeeeeeeeeeeeee/\eeee\eeeeeeeeeeeeeeeeee/\eeee\eeeeeeeee"
+echo "eeeeeeee/::\eeee\eeeeeeeeeeeeeeee/::\____\eeeeeeeeeeeeeeee/::\eeee\eeeeeeee"
+echo "eeeeeee/::::\eeee\eeeeeeeeeeeeee/::::|eee|eeeeeeeeeeeeeee/::::\eeee\eeeeeee"
+echo "eeeeee/::::::\eeee\eeeeeeeeeeee/:::::|eee|eeeeeeeeeeeeee/::::::\eeee\eeeeee"
+echo "eeeee/:::/\:::\eeee\eeeeeeeeee/::::::|eee|eeeeeeeeeeeee/:::/\:::\eeee\eeeee"
+echo "eeee/:::/__\:::\eeee\eeeeeeee/:::/|::|eee|eeeeeeeeeeee/:::/ee\:::\eeee\eeee"
+echo "eee/::::\eee\:::\eeee\eeeeee/:::/e|::|eee|eeeeeeeeeee/:::/eeee\:::\eeee\eee"
+echo "ee/::::::\eee\:::\eeee\eeee/:::/ee|::|eee|e_____eeee/:::/eeee/e\:::\eeee\ee"
+echo "e/:::/\:::\eee\:::\eeee\ee/:::/eee|::|eee|/\eeee\ee/:::/eeee/eee\:::\e___\e"
+echo "/:::/__\:::\eee\:::\____\/::e/eeee|::|eee/::\____\/:::/____/eeeee\:::|eeee|"
+echo "\:::\eee\:::\eee\::/eeee/\::/eeee/|::|ee/:::/eeee/\:::\eeee\eeeee/:::|____|"
+echo "e\:::\eee\:::\eee\/____/ee\/____/e|::|e/:::/eeee/ee\:::\eeee\eee/:::/eeee/e"
+echo "ee\:::\eee\:::\eeee\eeeeeeeeeeeeee|::|/:::/eeee/eeee\:::\eeee\e/:::/eeee/ee"
+echo "eee\:::\eee\:::\____\eeeeeeeeeeeee|::::::/eeee/eeeeee\:::\eeee/:::/eeee/eee"
+echo "eeee\:::\eee\::/eeee/eeeeeeeeeeeee|:::::/eeee/eeeeeeee\:::\ee/:::/eeee/eeee"
+echo "eeeee\:::\eee\/____/eeeeeeeeeeeeee|::::/eeee/eeeeeeeeee\:::\/:::/eeee/eeeee"
+echo "eeeeee\:::\eeee\eeeeeeeeeeeeeeeeee/:::/eeee/eeeeeeeeeeee\::::::/eeee/eeeeee"
+echo "eeeeeee\:::\____\eeeeeeeeeeeeeeee/:::/eeee/eeeeeeeeeeeeee\::::/eeee/eeeeeee"
+echo "eeeeeeee\::/eeee/eeeeeeeeeeeeeeee\::/eeee/eeeeeeeeeeeeeeee\::/____/eeeeeeee"
+echo "eeeeeeeee\/____/eeeeeeeeeeeeeeeeee\/____/eeeeeeeeeeeeeeeeee~~eeeeeeeeeeeeee"
+echo "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+
+pause 
+
+goto CLEANUP
+
+:CLEANUP 
+rem delete temp files
+cd %temp%
+if exist Debloater (
+   RMDIR "Debloater" /S /Q
+)
+goto EOF
+
+:EOF
+echo "eeeeeeeeee_____eeeeeeeeee"
+echo "eeeeeeeee/\eeee\eeeeeeeee"
+echo "eeeeeeee/::\eeee\eeeeeeee"
+echo "eeeeeee/::::\eeee\eeeeeee"
+echo "eeeeee/::::::\eeee\eeeeee"
+echo "eeeee/:::/\:::\eeee\eeeee"
+echo "eeee/:::/__\:::\eeee\eeee"
+echo "eee/::::\eee\:::\eeee\eee"
+echo "ee/::::::\eee\:::\eeee\ee"
+echo "e/:::/\:::\eee\:::\eeee\e"
+echo "/:::/__\:::\eee\:::\____\"
+echo "\:::\eee\:::\eee\::/eeee/"
+echo "e\:::\eee\:::\eee\/____/e"
+echo "ee\:::\eee\:::\eeee\eeeee"
+echo "eee\:::\eee\:::\____\eeee"
+echo "eeee\:::\eee\::/eeee/eeee"
+echo "eeeee\:::\eee\/____/eeeee"
+echo "eeeeee\:::\eeee\eeeeeeeee"
+echo "eeeeeee\:::\____\eeeeeeee"
+echo "eeeeeeee\::/eeee/eeeeeeee"
+echo "eeeeeeeee\/____/eeeeeeeee"
+echo "eeeeeeeeeeeeeeeeeeeeeeeee"
+
 exit
